@@ -1,159 +1,189 @@
-# PI5 — Jogador Inteligente
+# PI5 — Frontend
 
-Projeto desenvolvido para implementação de um **jogador inteligente** para o jogo **The Last Graduation**, um jogo de estratégia inspirado no jogo de tabuleiro **Santorini**.
+Frontend web desenvolvido para o projeto **The Last Graduation**, um jogo de estratégia inspirado no jogo de tabuleiro **Santorini**.
 
-O projeto utiliza técnicas de **Inteligência Artificial** para analisar o estado do tabuleiro, avaliar possíveis jogadas e selecionar ações estratégicas durante a partida.
+A aplicação fornece a interface para interação com as partidas, permitindo visualizar jogos em andamento ou finalizados, entrar em partidas disponíveis e acompanhar partidas em tempo real como espectador.
 
-A aplicação conta com uma **API REST desenvolvida em Python com FastAPI**, responsável por receber o estado atual do jogo e retornar a jogada escolhida pelo algoritmo.
-
----
-
-## 🧠 Inteligência Artificial
-
-O jogador utiliza algoritmos de busca para analisar diferentes possibilidades de jogadas e tomar decisões durante a partida.
-
-As principais técnicas utilizadas são:
-
-* **Minimax** — análise de possíveis sequências de jogadas para escolha da melhor ação;
-* **Alpha-Beta Pruning** — redução do número de estados analisados durante a busca;
-* **Iterative Deepening** — realização de buscas progressivamente mais profundas;
-* **Ordenação de jogadas** — priorização de jogadas relevantes durante a busca;
-* **Função heurística** — avaliação da qualidade dos estados do tabuleiro.
-
-A implementação também utiliza uma abordagem de **make/undo**, permitindo realizar e desfazer movimentos durante a busca sem precisar criar uma cópia completa do tabuleiro a cada operação.
+O frontend foi desenvolvido com **React e Vite**, utilizando **React Router** para navegação, **Tailwind CSS** para estilização e **WebSocket** para atualização das partidas em tempo real.
 
 ---
 
-## ⚙️ API
+## 🎮 Funcionalidades
 
-O projeto possui um backend desenvolvido utilizando **FastAPI**.
+### 🏠 Listagem de partidas
 
-### `GET /health`
+A página inicial apresenta as partidas disponíveis, com:
 
-Endpoint utilizado para verificar se a aplicação está funcionando corretamente.
+* Paginação das partidas;
+* Busca por nome de grupo;
+* Identificação do status da partida;
+* Visualização dos grupos participantes;
+* Ações disponíveis de acordo com o estado da partida.
 
-### `POST /move`
-
-Recebe o estado atual do jogo e retorna a jogada escolhida pelo jogador inteligente.
+As opções apresentadas incluem **Entrar**, **Assistir** e **Ver partida**, dependendo da situação de cada jogo.
 
 ---
 
-## 🧪 Testes locais
+### 👁️ Modo espectador
 
-O projeto possui arquivos auxiliares para desenvolvimento e testes locais do algoritmo.
+A aplicação possui uma tela específica para acompanhar partidas como espectador.
 
-### 1. Implementação do algoritmo
+Ao acessar uma partida em andamento:
 
-O algoritmo deve ser desenvolvido em:
+1. O usuário é registrado como espectador;
+2. A aplicação recebe um `spectator_access_token`;
+3. Uma conexão **WebSocket** é estabelecida;
+4. As jogadas são recebidas em tempo real;
+5. O tabuleiro é atualizado conforme a partida acontece.
+
+A interface também apresenta o estado da conexão, indicando quando a partida está **ao vivo** ou quando está **conectando**.
+
+Quando a partida já terminou, o tabuleiro é apresentado no seu estado final sem necessidade de estabelecer uma conexão WebSocket.
+
+---
+
+## 🎲 Tabuleiro
+
+O tabuleiro possui uma grade **5×5**, representando o estado atual da partida.
+
+Cada célula apresenta:
+
+* Nível de construção;
+* Posição do professor;
+* Identificação visual das construções;
+* Representação diferenciada para construções de nível 4, utilizando uma cúpula.
+
+O componente do tabuleiro foi desenvolvido de forma reutilizável, recebendo o estado através de `props` e podendo ser utilizado tanto em partidas ao vivo quanto em partidas finalizadas.
+
+---
+
+## 🔐 Autenticação
+
+O estado do jogador autenticado é gerenciado utilizando **React Context**.
+
+O token de autenticação é persistido no `localStorage`, permitindo que a sessão seja restaurada quando o usuário retorna à aplicação.
+
+As requisições à API utilizam um helper centralizado para adicionar automaticamente o header de autorização, evitando a necessidade de passar o token manualmente em cada chamada.
+
+---
+
+## 🧩 Arquitetura
+
+A estrutura do frontend foi organizada separando infraestrutura, domínio do jogo, rotas e componentes reutilizáveis:
 
 ```text
-pi5-aux/ia_template.py
+src/
+├── core/
+│   ├── components/
+│   └── helpers/
+│
+├── feature/
+│   └── game/
+│       ├── components/
+│       ├── context/
+│       ├── hooks/
+│       └── ...
+│
+├── routes/
+│
+├── styles/
+│
+├── ui/
+│
+└── main.jsx
 ```
 
-Na função:
-
-```python
-escolher_jogada(payload)
-```
-
-Essa função recebe o estado atual do jogo e retorna a jogada escolhida pelo algoritmo.
+A separação permite manter a lógica específica do jogo concentrada em `feature/game`, enquanto componentes e funcionalidades compartilhadas ficam organizados em `core` e `ui`.
 
 ---
 
-### 2. Testar uma jogada
+## ⚙️ Tecnologias
 
-Para executar uma única jogada utilizando um estado aleatório:
+* **React 19**
+* **Vite**
+* **React Router**
+* **Tailwind CSS**
+* **React Hook Form**
+* **Zod**
+* **WebSocket**
+* **JavaScript**
+* **HTML/CSS**
+* **Git/GitHub**
+
+As principais dependências e ferramentas utilizadas estão definidas no `package.json` do projeto.
+
+---
+
+## 🚀 Executando o projeto
+
+### Pré-requisitos
+
+É necessário ter o **Node.js** instalado.
+
+### Instalação
+
+Clone o repositório:
 
 ```bash
-python pi5-aux/rodar_jogada_unica.py
+git clone https://github.com/alinedka/pi5-frontend.git
 ```
 
-O script:
-
-1. Gera um tabuleiro aleatório;
-2. Cria o estado do jogo;
-3. Executa o algoritmo;
-4. Verifica se a resposta corresponde a uma jogada válida.
-
----
-
-### 3. Simular uma partida completa
-
-Para executar uma partida local:
+Entre na pasta:
 
 ```bash
-python pi5-aux/simular_partida_local.py
+cd pi5-frontend
 ```
 
-A simulação utiliza:
+Instale as dependências:
 
-* **Time 1:** jogador desenvolvido;
-* **Time 2:** jogador aleatório.
-
-A partida é executada até ocorrer:
-
-* vitória de um dos jogadores;
-* jogada inválida;
-* limite de turnos.
-
----
-
-## 📊 Validação
-
-As ferramentas de simulação permitem testar o comportamento do jogador inteligente em partidas completas, verificando se as jogadas produzidas pelo algoritmo são válidas e permitindo avaliar seu desempenho contra um jogador aleatório.
-
-As simulações também podem ser utilizadas durante o desenvolvimento para identificar problemas na lógica de decisão e validar alterações realizadas no algoritmo.
-
----
-
-## 🛠️ Tecnologias
-
-* **Python**
-* **FastAPI**
-* **Inteligência Artificial**
-* **Minimax**
-* **Alpha-Beta Pruning**
-* **Iterative Deepening**
-* **Git**
-* **GitHub**
-
----
-
-## 📁 Estrutura do projeto
-
-```text
-pi5/
-├── backend/
-│   ├── main.py
-│   └── ia.py
-│
-├── pi5-aux/
-│   ├── ia_template.py
-│   ├── rodar_jogada_unica.py
-│   ├── simular_partida_local.py
-│   └── game_simulator.py
-│
-├── game_simulator.py
-├── ia_template.py
-├── requirements.txt
-├── Procfile
-├── REPORT.md
-└── README.md
+```bash
+npm install
 ```
+
+### Ambiente de desenvolvimento
+
+Execute:
+
+```bash
+npm run dev
+```
+
+O Vite iniciará o servidor de desenvolvimento.
+
+### Build de produção
+
+Para gerar a versão de produção:
+
+```bash
+npm run build
+```
+
+Para visualizar o build localmente:
+
+```bash
+npm run preview
+```
+
+Os scripts disponíveis no projeto incluem `dev`, `build`, `start`, `lint` e `preview`.
+
+---
+
+## 🔗 Integração com o Backend
+
+O frontend faz parte do projeto **PI5 — Jogador Inteligente** e foi desenvolvido para trabalhar em conjunto com a API responsável pelo gerenciamento das partidas e pela comunicação com o jogador inteligente.
+
+O backend utiliza **Python + FastAPI**, enquanto o frontend é responsável pela interface web e pela interação visual com as partidas.
 
 ---
 
 ## 📚 Documentação
 
-Para informações mais detalhadas sobre a implementação, algoritmos utilizados e decisões de desenvolvimento, consulte:
+Para informações mais detalhadas sobre a arquitetura, componentes e decisões técnicas do frontend, consulte:
 
-* **[REPORT.md](REPORT.md)** — relatório técnico do projeto;
-* **[como-usar-pi5-aux.md](como-usar-pi5-aux.md)** — instruções para execução dos testes locais.
+* **[REPORT.md](REPORT.md)** — relatório técnico do frontend.
 
 ---
 
-## 🎮 Sobre o jogo
+## 🎯 Objetivo do projeto
 
-**The Last Graduation** é um jogo de estratégia inspirado no conceito e na mecânica do jogo de tabuleiro **Santorini**.
-
-O objetivo do projeto é utilizar técnicas de Inteligência Artificial para desenvolver um jogador capaz de analisar o tabuleiro e tomar decisões estratégicas de forma autônoma.
+O objetivo do frontend é fornecer uma interface web organizada e interativa para o **The Last Graduation**, permitindo aos jogadores e espectadores acompanhar as partidas de forma intuitiva e receber atualizações em tempo real durante os jogos.
